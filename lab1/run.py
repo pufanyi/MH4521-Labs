@@ -49,11 +49,15 @@ if __name__ == "__main__":
     wandb.log({"experiment_completed": True, "total_rounds": 1000})
 
     # Create a formatted string for the results
+    num_rounds = 1000
     result_str = (
         f"Final cumulative regret: [bold green]{results['regret']:.4f}[/bold green]\n"
-        f"Final average regret: [bold green]{results['regret'] / 1000:.4f}[/bold green]\n"
-        f"Final total reward: [bold yellow]{results['total_reward']:.4f}[/bold yellow]\n"
-        f"Final average reward: [bold yellow]{results['total_reward'] / 1000:.4f}[/bold yellow]"
+        f"Final average regret: "
+        f"[bold green]{results['regret'] / num_rounds:.4f}[/bold green]\n"
+        f"Final total reward: "
+        f"[bold yellow]{results['total_reward']:.4f}[/bold yellow]\n"
+        f"Final average reward: "
+        f"[bold yellow]{results['total_reward'] / num_rounds:.4f}[/bold yellow]"
     )
 
     # Print results in a panel

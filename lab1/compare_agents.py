@@ -158,7 +158,9 @@ def compare_all_agents(
 
     with Live(progress, refresh_per_second=10) as live:
         seed_task = progress.add_task("[green]Total Progress", total=num_seeds)
-        agent_task = progress.add_task("[cyan]Current Agent", total=len(agent_configs))
+        agent_task = progress.add_task(
+            "[cyan]Current Agent", total=len(agent_configs)
+        )
 
         for seed in range(num_seeds):
             progress.update(
@@ -181,7 +183,9 @@ def compare_all_agents(
                 agent_name = config["name"]
                 run_name = f"{agent_name}_seed_{seed}"
 
-                progress.update(agent_task, description=f"[cyan]Running: {agent_name}")
+                progress.update(
+                    agent_task, description=f"[cyan]Running: {agent_name}"
+                )
 
                 try:
                     results = run_agent_experiment(
@@ -211,7 +215,7 @@ def compare_all_agents(
         Panel(
             "Multi-Agent Experiment Summary",
             title="[bold green]Summary[/bold green]",
-            expand=True,
+            expand=False,
         )
     )
 
@@ -274,8 +278,10 @@ if __name__ == "__main__":
 
     console.print(
         Panel(
-            "Comparison completed! Check your Weights & Biases dashboard for detailed results.\n"
-            "Project: [bold]mh4521-bandit-comparison[/bold]",
+            (
+                "Comparison completed! Check your Weights & Biases dashboard for "
+                "detailed results.\nProject: [bold]mh4521-bandit-comparison[/bold]"
+            ),
             title="[bold green]Finished[/bold green]",
         )
     )
