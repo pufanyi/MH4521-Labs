@@ -1,0 +1,21 @@
+from lab1.bandit.base import Bandit
+import numpy as np
+
+class UCBPlayer():
+    def __init__(self, bandit: Bandit, delta: float, c: float):
+        self.bandit = bandit
+        self.delta = delta
+        self.c = c
+        if self.c <= 0:
+            raise ValueError("c must be greater than 0")
+        self.ucb_values = [float("inf")] * self.bandit.n_arms
+        self.num_pulls = [0] * self.bandit.n_arms
+        self.q_values = [0] * self.bandit.n_arms
+        
+    def play(self):
+        selected_arm = np.argmax(self.ucb_values)
+        reward = self.bandit.pull(selected_arm)
+        self.num_pulls[selected_arm] += 1
+        self.q_values[selected_arm] = self.q_values[selected_arm] + (reward - self.q_values[selected_arm]) / self.num_pulls[selected_arm]
+        self.ucb_values[selected_arm] = self.q_values[selected_arm] + self.c * np.sqrt(2 * np.log(1.0 / self.delta) / self.num_pulls[selected_arm])
+        return selected_arm

@@ -9,3 +9,6 @@ class Bandit(ABC):
     @abstractmethod
     def generate_arm(self) -> Arm:
         raise NotImplementedError
+
+    def pull(self, arm: int) -> float:
+        return self.arms[arm].pull()

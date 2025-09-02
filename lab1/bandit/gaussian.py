@@ -4,7 +4,8 @@ from lab1.arm.base import Arm
 import numpy as np
 
 class GaussianBandit(Bandit):
-    def __init__(self, n_arms: int, mean: float, std: float, arms_std: float):
+    def __init__(self, n_arms: int, mean: float, std: float, arms_std: float, seed: int = 42):
+        np.random.seed(seed)
         self.mean = mean
         self.std = std
         self.arms_std = arms_std
@@ -13,3 +14,4 @@ class GaussianBandit(Bandit):
     def generate_arm(self) -> Arm:
         arms_mean = np.random.normal(self.mean, self.arms_std, self.n_arms)
         return GaussianArm(arms_mean, self.std)
+    
