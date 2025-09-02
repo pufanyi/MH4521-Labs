@@ -12,6 +12,6 @@ class GaussianBandit(Bandit):
         super().__post_init__(n_arms)
 
     def generate_arm(self) -> Arm:
-        arms_mean = np.random.normal(self.mean, self.arms_std, self.n_arms)
+        arms_mean = np.random.normal(self.mean, self.arms_std)
         return GaussianArm(arms_mean, self.std)
     
