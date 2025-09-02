@@ -25,8 +25,6 @@ class EpsAgent(Agent):
             selected_arm = np.argmax(self.q_values)
         reward = self.bandit.pull(selected_arm)
         self.num_pulls[selected_arm] += 1
-        # self.q_values[selected_arm] = self.q_values[selected_arm] + (reward - self.q_values[selected_arm]) / self.num_pulls[selected_arm]
-        self.q_values[selected_arm] = self.q_values[selected_arm] + self.alpha * (
-            reward - self.q_values[selected_arm]
-        )
+        update = self.alpha * (reward - self.q_values[selected_arm])
+        self.q_values[selected_arm] += update
         return Results(selected_arm=selected_arm, reward=reward)

@@ -1,6 +1,7 @@
 """
 Multi-Agent Comparison Script with Wandb Integration
-This script runs multiple bandit agents and compares their performance using Weights & Biases.
+This script runs multiple bandit agents and compares their performance using
+Weights & Biases.
 """
 
 import time
@@ -211,6 +212,7 @@ if __name__ == "__main__":
     results, summaries = compare_all_agents(num_rounds=1000, num_seeds=3)
 
     print(
-        "\nComparison completed! Check your Weights & Biases dashboard for detailed results."
+        "Comparison completed! Check your Weights & Biases dashboard for detailed "
+        "results."
     )
     print("Project: mh4521-bandit-comparison")
