@@ -15,19 +15,5 @@ jobs:
           enable-cache: true
       - name: Install dependencies
         run: uv sync --dev
-      - name: Run pre-commit checks
-        id: pre-commit
+      - name: run pre-commit
         run: uv run pre-commit run --all-files
-        continue-on-error: true
-
-      - name: Show changes if pre-commit failed
-        if: steps.pre-commit.outcome == 'failure'
-        run: |
-          echo "pre-commit modified files. See the diff below:"
-          git diff --color=always
-
-      - name: Fail the job if pre-commit failed
-        if: steps.pre-commit.outcome == 'failure'
-        run: |
-          echo "Please run 'uv run pre-commit run --all-files' locally, commit the changes, and push again."
-          exit 1
