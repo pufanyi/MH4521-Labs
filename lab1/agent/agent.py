@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import wandb
 from pydantic import BaseModel
-from tqdm import trange
+from rich.progress import track
 
 from lab1.bandit.base import Bandit
 
@@ -29,7 +29,7 @@ class Agent(ABC):
         cumulative_regret = []
         cumulative_reward = []
 
-        for i in trange(num_rounds, desc="Evaluating agent"):
+        for i in track(range(num_rounds), description="Evaluating agent..."):
             result = self.play()
             instant_regret = (
                 self.bandit.best_arm_mean - self.bandit.arms[result.selected_arm].mean()

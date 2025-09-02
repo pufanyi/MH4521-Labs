@@ -1,9 +1,14 @@
 import wandb
+from rich.console import Console
+from rich.panel import Panel
 
 from .agent.ucb_agent import UCBAgent
 from .bandit.gaussian import GaussianBandit
 
 if __name__ == "__main__":
+    # Initialize rich console
+    console = Console()
+
     # Initialize wandb
     wandb.init(
         project="mh4521-bandit-lab",
@@ -43,9 +48,17 @@ if __name__ == "__main__":
     # Log final results
     wandb.log({"experiment_completed": True, "total_rounds": 1000})
 
-    print(f"Final cumulative regret: {results['regret']:.4f}")
-    print(f"Final average regret: {results['regret'] / 1000:.4f}")
-    print(f"Final total reward: {results['total_reward']:.4f}")
-    print(f"Final average reward: {results['total_reward'] / 1000:.4f}")
+    # Create a formatted string for the results
+    result_str = (
+        f"Final cumulative regret: [bold green]{results['regret']:.4f}[/bold green]\n"
+        f"Final average regret: [bold green]{results['regret'] / 1000:.4f}[/bold green]\n"
+        f"Final total reward: [bold yellow]{results['total_reward']:.4f}[/bold yellow]\n"
+        f"Final average reward: [bold yellow]{results['total_reward'] / 1000:.4f}[/bold yellow]"
+    )
+
+    # Print results in a panel
+    console.print(
+        Panel(result_str, title="[bold cyan]UCB Agent Run Summary[/bold cyan]")
+    )
 
     wandb.finish()

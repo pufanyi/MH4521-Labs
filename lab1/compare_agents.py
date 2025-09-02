@@ -9,6 +9,9 @@ from typing import Any
 
 import numpy as np
 import wandb
+from rich.console import Console
+from rich.panel import Panel
+from rich.table import Table
 
 from .agent.eps_agent import EpsAgent
 from .agent.etc_agent import EtcAgent
@@ -98,6 +101,7 @@ def compare_all_agents(
     num_rounds: int = 1000, bandit_config: dict[str, Any] = None, num_seeds: int = 3
 ):
     """Compare all agents across multiple seeds."""
+    console = Console()
 
     if bandit_config is None:
         bandit_config = {"n_arms": 4, "mean": 0, "std": 1, "arms_std": 0.1}
@@ -134,8 +138,14 @@ def compare_all_agents(
 
     all_results = []
 
+    # Use rich.progress for the outer loop
     for seed in range(num_seeds):
-        print(f"\n=== Running experiments with seed {seed} ===")
+        console.print(
+            Panel(
+                f"Running experiments with seed {seed}",
+                title="[bold blue]Seed Information[/bold blue]",
+            )
+        )
 
         # Create bandit with current seed
         bandit = GaussianBandit(seed=seed, **bandit_config)
@@ -146,7 +156,7 @@ def compare_all_agents(
             agent_name = config["name"]
 
             run_name = f"{agent_name}_seed_{seed}"
-            print(f"Running {run_name}...")
+            console.print(f"Running {run_name}...")
 
             try:
                 results = run_agent_experiment(
@@ -160,18 +170,24 @@ def compare_all_agents(
                 results["agent_name"] = agent_name
                 all_results.append(results)
 
-                print(f"  Final regret: {results['final_regret']:.4f}")
-                print(f"  Average regret: {results['avg_regret']:.4f}")
-                print(f"  Execution time: {results['execution_time']:.2f}s")
+                console.print(
+                    f"  [green]✓[/green] {run_name} completed. "
+                    f"Final regret: {results['final_regret']:.4f}, "
+                    f"Time: {results['execution_time']:.2f}s"
+                )
 
             except Exception as e:
-                print(f"  Error running {run_name}: {e}")
+                console.print(f"  [red]✗[/red] Error running {run_name}: {e}")
                 continue
 
-    # Summarize results
-    print("\n" + "=" * 60)
-    print("EXPERIMENT SUMMARY")
-    print("=" * 60)
+    # Summarize results in a rich table
+    console.print(
+        Panel(
+            "Multi-Agent Experiment Summary",
+            title="[bold green]Summary[/bold green]",
+            expand=False,
+        )
+    )
 
     # Group results by agent type
     agent_summaries = {}
@@ -184,35 +200,64 @@ def compare_all_agents(
         agent_summaries[agent_name]["rewards"].append(result["avg_reward"])
         agent_summaries[agent_name]["times"].append(result["execution_time"])
 
-    # Print summary statistics
+    # Create and print summary table
+    summary_table = Table(
+        title="Agent Performance Summary", show_header=True, header_style="bold magenta"
+    )
+    summary_table.add_column("Agent Name", style="cyan", no_wrap=True)
+    summary_table.add_column("Avg Regret", justify="right", style="green")
+    summary_table.add_column("Avg Reward", justify="right", style="yellow")
+    summary_table.add_column("Avg Time (s)", justify="right", style="blue")
+
     for agent_name, summary in agent_summaries.items():
         regrets = np.array(summary["regrets"])
         rewards = np.array(summary["rewards"])
         times = np.array(summary["times"])
 
-        print(f"\n{agent_name}:")
-        print(f"  Average Regret: {regrets.mean():.4f} ± {regrets.std():.4f}")
-        print(f"  Average Reward: {rewards.mean():.4f} ± {rewards.std():.4f}")
-        print(f"  Execution Time: {times.mean():.2f}s ± {times.std():.2f}s")
+        summary_table.add_row(
+            agent_name,
+            f"{regrets.mean():.4f} ± {regrets.std():.4f}",
+            f"{rewards.mean():.4f} ± {rewards.std():.4f}",
+            f"{times.mean():.2f} ± {times.std():.2f}",
+        )
 
-    # Find best performing agent
-    best_agent = min(agent_summaries.items(), key=lambda x: np.mean(x[1]["regrets"]))
-    print(f"\nBest performing agent: {best_agent[0]}")
-    print(f"  Average regret: {np.mean(best_agent[1]['regrets']):.4f}")
+    console.print(summary_table)
+
+    # Find and highlight the best performing agent
+    best_agent_name, best_agent_summary = min(
+        agent_summaries.items(), key=lambda x: np.mean(x[1]["regrets"])
+    )
+    best_regret = np.mean(best_agent_summary["regrets"])
+
+    console.print(
+        Panel(
+            f"Best performing agent: [bold cyan]{best_agent_name}[/bold cyan]\n" 
+            f"  Average regret: [bold green]{best_regret:.4f}[/bold green]",
+            title="[bold yellow]Top Performer[/bold yellow]",
+        )
+    )
 
     return all_results, agent_summaries
 
 
 if __name__ == "__main__":
-    print("Starting multi-agent bandit comparison...")
-    print("This will run multiple agents with different configurations.")
-    print("Results will be logged to Weights & Biases.")
+    console = Console()
+    console.print(
+        Panel(
+            "Starting multi-agent bandit comparison...\n" 
+            "This will run multiple agents with different configurations.\n" 
+            "Results will be logged to Weights & Biases.",
+            title="[bold blue]MH4521 Bandit Comparison[/bold blue]",
+        )
+    )
 
     # Run comprehensive comparison
     results, summaries = compare_all_agents(num_rounds=1000, num_seeds=3)
 
-    print(
-        "Comparison completed! Check your Weights & Biases dashboard for detailed "
-        "results."
+    console.print(
+        Panel(
+            "Comparison completed! Check your Weights & Biases dashboard for detailed results.\n" 
+            "Project: [bold]mh4521-bandit-comparison[/bold]",
+            title="[bold green]Finished[/bold green]",
+        )
     )
-    print("Project: mh4521-bandit-comparison")
