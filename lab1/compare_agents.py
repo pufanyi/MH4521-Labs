@@ -10,10 +10,10 @@ from typing import Any
 import numpy as np
 import wandb
 
-from lab1.agent.eps_agent import EpsAgent
-from lab1.agent.etc_agent import EtcAgent
-from lab1.agent.ucb_agent import UCBAgent
-from lab1.bandit.gaussian import GaussianBandit
+from .agent.eps_agent import EpsAgent
+from .agent.etc_agent import EtcAgent
+from .agent.ucb_agent import UCBAgent
+from .bandit.gaussian import GaussianBandit
 
 
 def run_agent_experiment(
