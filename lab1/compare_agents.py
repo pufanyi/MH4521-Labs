@@ -158,9 +158,7 @@ def compare_all_agents(
 
     with Live(progress, refresh_per_second=10) as live:
         seed_task = progress.add_task("[green]Total Progress", total=num_seeds)
-        agent_task = progress.add_task(
-            "[cyan]Current Agent", total=len(agent_configs)
-        )
+        agent_task = progress.add_task("[cyan]Current Agent", total=len(agent_configs))
 
         for seed in range(num_seeds):
             progress.update(
@@ -183,9 +181,7 @@ def compare_all_agents(
                 agent_name = config["name"]
                 run_name = f"{agent_name}_seed_{seed}"
 
-                progress.update(
-                    agent_task, description=f"[cyan]Running: {agent_name}"
-                )
+                progress.update(agent_task, description=f"[cyan]Running: {agent_name}")
 
                 try:
                     results = run_agent_experiment(
@@ -254,7 +250,7 @@ def compare_all_agents(
     best_regret = np.mean(best_agent_summary["regrets"])
     console.print(
         Panel(
-            f"Best performing agent: [bold cyan]{best_agent_name}[/bold cyan]\n" 
+            f"Best performing agent: [bold cyan]{best_agent_name}[/bold cyan]\n"
             f"  Average regret: [bold green]{best_regret:.4f}[/bold green]",
             title="[bold yellow]Top Performer[/bold yellow]",
         )
@@ -267,8 +263,8 @@ if __name__ == "__main__":
     console = Console()
     console.print(
         Panel(
-            "Starting multi-agent bandit comparison...\n" 
-            "This will run multiple agents with different configurations.\n" 
+            "Starting multi-agent bandit comparison...\n"
+            "This will run multiple agents with different configurations.\n"
             "Results will be logged to Weights & Biases.",
             title="[bold blue]MH4521 Bandit Comparison[/bold blue]",
         )
@@ -278,7 +274,7 @@ if __name__ == "__main__":
 
     console.print(
         Panel(
-            "Comparison completed! Check your Weights & Biases dashboard for detailed results.\n" 
+            "Comparison completed! Check your Weights & Biases dashboard for detailed results.\n"
             "Project: [bold]mh4521-bandit-comparison[/bold]",
             title="[bold green]Finished[/bold green]",
         )
