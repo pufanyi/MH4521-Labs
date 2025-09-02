@@ -1,4 +1,5 @@
 import wandb
+
 from lab1.agent.ucb_agent import UCBAgent
 from lab1.bandit.gaussian import GaussianBandit
 

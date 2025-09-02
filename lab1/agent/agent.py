@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
+import wandb
 from pydantic import BaseModel
 from tqdm import trange
 
-import wandb
 from lab1.bandit.base import Bandit
 
 
