@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
-from lab1.arm.base import Arm
+
 import numpy as np
+
+from lab1.arm.base import Arm
+
 
 class Bandit(ABC):
     def __post_init__(self, n_arms: int):

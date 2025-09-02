@@ -1,5 +1,7 @@
 import numpy as np
+
 from lab1.arm.base import Arm
+
 
 class GaussianArm(Arm):
     def __init__(self, mean: float = 0, std: float = 1):
@@ -11,6 +13,6 @@ class GaussianArm(Arm):
 
     def mean(self):
         return self._mean
-    
+
     def std(self):
         return self._std

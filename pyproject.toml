@@ -7,6 +7,18 @@ requires-python = ">=3.12"
 dependencies = [
     "numpy>=2.3.2",
     "pydantic>=2.11.7",
+    "ruff>=0.12.11",
     "tqdm>=4.67.1",
     "wandb>=0.21.3",
 ]
+
+[tool.ruff]
+# Rule selection:
+# E: pycodestyle (style errors)
+# F: Pyflakes (logical errors)
+# I: isort (import sorting)
+# B: flake8-bugbear (bug detection)
+# UP: pyupgrade (syntax modernization)
+# A: flake8-builtins (built-in shadowing)
+# C4: flake8-comprehensions (comprehension best practices)
+lint.select = ["E", "F", "I", "B", "UP", "A", "C4"]
