@@ -10,7 +10,14 @@ from typing import Any
 import numpy as np
 import wandb
 from rich.console import Console
+from rich.live import Live
 from rich.panel import Panel
+from rich.progress import (
+    BarColumn,
+    Progress,
+    TextColumn,
+    TimeRemainingColumn,
+)
 from rich.table import Table
 
 from .agent.eps_agent import EpsAgent
@@ -44,6 +51,8 @@ def run_agent_experiment(
             **agent_params,
         },
         tags=["comparison", agent_class.__name__.lower(), "multi_agent_run"],
+        reinit=True,
+        force=True,
     )
 
     # Create agent with bandit
@@ -60,7 +69,7 @@ def run_agent_experiment(
     # Run evaluation
     start_time = time.time()
     results = agent.evaluate(num_rounds=num_rounds, log_frequency=50)
-    end_time = time.time()
+    end_time = time.time() # This line was missing in the original string
 
     # Calculate performance metrics
     final_regret = results["regret"]
@@ -138,49 +147,66 @@ def compare_all_agents(
 
     all_results = []
 
-    # Use rich.progress for the outer loop
-    for seed in range(num_seeds):
-        console.print(
-            Panel(
-                f"Running experiments with seed {seed}",
-                title="[bold blue]Seed Information[/bold blue]",
+    progress = Progress(
+        TextColumn("[bold blue]{task.description}", justify="right"),
+        BarColumn(bar_width=None),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        "•",
+        TimeRemainingColumn(),
+        console=console,
+    )
+
+    with Live(progress, refresh_per_second=10) as live:
+        seed_task = progress.add_task("[green]Total Progress", total=num_seeds)
+
+        for seed in range(num_seeds):
+            progress.update(
+                seed_task, description=f"[green]Running Seed {seed+1}/{num_seeds}"
             )
-        )
 
-        # Create bandit with current seed
-        bandit = GaussianBandit(seed=seed, **bandit_config)
-
-        for config in agent_configs:
-            agent_class = config["class"]
-            agent_params = config["params"].copy()
-            agent_name = config["name"]
-
-            run_name = f"{agent_name}_seed_{seed}"
-            console.print(f"Running {run_name}...")
-
-            try:
-                results = run_agent_experiment(
-                    agent_class=agent_class,
-                    agent_params=agent_params,
-                    bandit=bandit,
-                    num_rounds=num_rounds,
-                    run_name=run_name,
+            live.console.print(
+                Panel(
+                    f"Running experiments with seed {seed}",
+                    title="[bold blue]Seed Information[/bold blue]",
                 )
-                results["seed"] = seed
-                results["agent_name"] = agent_name
-                all_results.append(results)
+            )
 
-                console.print(
-                    f"  [green]✓[/green] {run_name} completed. "
-                    f"Final regret: {results['final_regret']:.4f}, "
-                    f"Time: {results['execution_time']:.2f}s"
+            bandit = GaussianBandit(seed=seed, **bandit_config)
+            agent_task = progress.add_task(
+                "[cyan]Agent Progress", total=len(agent_configs)
+            )
+
+            for config in agent_configs:
+                agent_class = config["class"]
+                agent_params = config["params"].copy()
+                agent_name = config["name"]
+                run_name = f"{agent_name}_seed_{seed}"
+
+                progress.update(
+                    agent_task, description=f"[cyan]Running: {agent_name}"
                 )
 
-            except Exception as e:
-                console.print(f"  [red]✗[/red] Error running {run_name}: {e}")
-                continue
+                try:
+                    results = run_agent_experiment(
+                        agent_class=agent_class,
+                        agent_params=agent_params,
+                        bandit=bandit,
+                        num_rounds=num_rounds,
+                        run_name=run_name,
+                    )
+                    results["seed"] = seed
+                    results["agent_name"] = agent_name
+                    all_results.append(results)
+                    live.console.print(f"  [green]✓[/green] {run_name} completed.")
+                except Exception as e:
+                    live.console.print(f"  [red]✗[/red] Error running {run_name}: {e}")
+                finally:
+                    progress.update(agent_task, advance=1)
 
-    # Summarize results in a rich table
+            progress.remove_task(agent_task)
+            progress.update(seed_task, advance=1)
+
+    # Final summary section (outside the Live context)
     console.print(
         Panel(
             "Multi-Agent Experiment Summary",
@@ -189,18 +215,15 @@ def compare_all_agents(
         )
     )
 
-    # Group results by agent type
     agent_summaries = {}
     for result in all_results:
         agent_name = result["agent_name"]
         if agent_name not in agent_summaries:
             agent_summaries[agent_name] = {"regrets": [], "rewards": [], "times": []}
-
         agent_summaries[agent_name]["regrets"].append(result["avg_regret"])
         agent_summaries[agent_name]["rewards"].append(result["avg_reward"])
         agent_summaries[agent_name]["times"].append(result["execution_time"])
 
-    # Create and print summary table
     summary_table = Table(
         title="Agent Performance Summary", show_header=True, header_style="bold magenta"
     )
@@ -213,22 +236,18 @@ def compare_all_agents(
         regrets = np.array(summary["regrets"])
         rewards = np.array(summary["rewards"])
         times = np.array(summary["times"])
-
         summary_table.add_row(
             agent_name,
             f"{regrets.mean():.4f} ± {regrets.std():.4f}",
             f"{rewards.mean():.4f} ± {rewards.std():.4f}",
             f"{times.mean():.2f} ± {times.std():.2f}",
         )
-
     console.print(summary_table)
 
-    # Find and highlight the best performing agent
     best_agent_name, best_agent_summary = min(
         agent_summaries.items(), key=lambda x: np.mean(x[1]["regrets"])
     )
     best_regret = np.mean(best_agent_summary["regrets"])
-
     console.print(
         Panel(
             f"Best performing agent: [bold cyan]{best_agent_name}[/bold cyan]\n" 
@@ -251,7 +270,6 @@ if __name__ == "__main__":
         )
     )
 
-    # Run comprehensive comparison
     results, summaries = compare_all_agents(num_rounds=1000, num_seeds=3)
 
     console.print(
