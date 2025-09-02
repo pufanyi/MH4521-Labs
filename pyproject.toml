@@ -22,3 +22,8 @@ dependencies = [
 # A: flake8-builtins (built-in shadowing)
 # C4: flake8-comprehensions (comprehension best practices)
 lint.select = ["E", "F", "I", "B", "UP", "A", "C4"]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.3.0",
+]
