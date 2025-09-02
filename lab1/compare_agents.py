@@ -69,7 +69,7 @@ def run_agent_experiment(
     # Run evaluation
     start_time = time.time()
     results = agent.evaluate(num_rounds=num_rounds, log_frequency=50)
-    end_time = time.time() # This line was missing in the original string
+    end_time = time.time()
 
     # Calculate performance metrics
     final_regret = results["regret"]
@@ -158,11 +158,15 @@ def compare_all_agents(
 
     with Live(progress, refresh_per_second=10) as live:
         seed_task = progress.add_task("[green]Total Progress", total=num_seeds)
+        agent_task = progress.add_task(
+            "[cyan]Current Agent", total=len(agent_configs)
+        )
 
         for seed in range(num_seeds):
             progress.update(
-                seed_task, description=f"[green]Running Seed {seed+1}/{num_seeds}"
+                seed_task, description=f"[green]Running Seed {seed + 1}/{num_seeds}"
             )
+            progress.reset(agent_task, total=len(agent_configs))
 
             live.console.print(
                 Panel(
@@ -172,9 +176,6 @@ def compare_all_agents(
             )
 
             bandit = GaussianBandit(seed=seed, **bandit_config)
-            agent_task = progress.add_task(
-                "[cyan]Agent Progress", total=len(agent_configs)
-            )
 
             for config in agent_configs:
                 agent_class = config["class"]
@@ -203,15 +204,18 @@ def compare_all_agents(
                 finally:
                     progress.update(agent_task, advance=1)
 
-            progress.remove_task(agent_task)
             progress.update(seed_task, advance=1)
+
+        progress.update(
+            agent_task, description="[bold cyan]All Agents Done[/bold cyan]"
+        )
 
     # Final summary section (outside the Live context)
     console.print(
         Panel(
             "Multi-Agent Experiment Summary",
             title="[bold green]Summary[/bold green]",
-            expand=False,
+            expand=True,
         )
     )
 
