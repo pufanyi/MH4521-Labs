@@ -114,11 +114,11 @@ def compare_all_agents(
             "params": {"eps": 0.05, "alpha": 0.1},
             "name": "EpsilonGreedy_low",
         },
-        {"class": EtcAgent, "params": {"num_trials": 10}, "name": "ExploreThemCommit"},
+        {"class": EtcAgent, "params": {"num_trials": 10}, "name": "ExploreThenCommit"},
         {
             "class": EtcAgent,
             "params": {"num_trials": 20},
-            "name": "ExploreThemCommit_more",
+            "name": "ExploreThenCommit_more",
         },
         {
             "class": UCBAgent,
