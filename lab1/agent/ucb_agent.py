@@ -3,8 +3,8 @@ import numpy as np
 from lab1.agent.agent import Agent, Results
 
 class UCBAgent(Agent):
-    def __init__(self, bandit: Bandit, delta: float, c: float, eps: float = 0):
-        self.bandit = bandit
+    def __init__(self, bandit: Bandit, delta: float, c: float, eps: float = 0, log_to_wandb: bool = True):
+        super().__init__(bandit, log_to_wandb)
         self.delta = delta
         self.c = c
         self.eps = eps

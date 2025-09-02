@@ -3,8 +3,8 @@ import numpy as np
 from lab1.agent.agent import Agent, Results
 
 class EtcAgent(Agent):
-    def __init__(self, bandit: Bandit, num_trials: int):
-        self.bandit = bandit
+    def __init__(self, bandit: Bandit, num_trials: int, log_to_wandb: bool = True):
+        super().__init__(bandit, log_to_wandb)
         self.num_trials = num_trials * self.bandit.n_arms
         self.num_pulls = [0] * self.bandit.n_arms
         self.q_values = [0] * self.bandit.n_arms

@@ -14,5 +14,4 @@ class Bandit(ABC):
         raise NotImplementedError
 
     def pull(self, arm: int) -> float:
-        print(f"Arms: {[arm.mean() for arm in self.arms]}")
         return self.arms[arm].pull()

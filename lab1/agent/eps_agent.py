@@ -3,8 +3,8 @@ import numpy as np
 from lab1.agent.agent import Agent, Results
 
 class EpsAgent(Agent):
-    def __init__(self, bandit: Bandit, eps: float, alpha: float = 0.1):
-        self.bandit = bandit
+    def __init__(self, bandit: Bandit, eps: float, alpha: float = 0.1, log_to_wandb: bool = True):
+        super().__init__(bandit, log_to_wandb)
         self.eps = eps
         if self.eps < 0 or self.eps > 1:
             raise ValueError("eps must be between 0 and 1")
@@ -23,5 +23,4 @@ class EpsAgent(Agent):
         self.num_pulls[selected_arm] += 1
         # self.q_values[selected_arm] = self.q_values[selected_arm] + (reward - self.q_values[selected_arm]) / self.num_pulls[selected_arm]
         self.q_values[selected_arm] = self.q_values[selected_arm] + self.alpha * (reward - self.q_values[selected_arm])
-        print(f"Q values: {self.q_values}")
         return Results(selected_arm=selected_arm, reward=reward)
